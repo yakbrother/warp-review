@@ -31,13 +31,18 @@ warp-review status
 
 ## Code Style
 
-This project follows these coding standards:
+This project follows comprehensive coding standards documented in [CODING_STANDARDS.md](CODING_STANDARDS.md).
 
-- **Python**: PEP 8 style guide
+Key highlights:
+- **Python**: PEP 8 style guide with type hints
 - **Clear naming**: Descriptive variable and function names
 - **Documentation**: Docstrings for all functions and classes
 - **Comments**: Explain why, not what
-- **Type hints**: Use where beneficial
+- **Accessibility**: WCAG 2.2 compliance
+- **Testing**: Unit tests for all new code
+- **Security**: Validate all inputs, never commit secrets
+
+Please read [CODING_STANDARDS.md](CODING_STANDARDS.md) before contributing.
 
 ## Testing
 
