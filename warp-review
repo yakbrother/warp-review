@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+"""
+Warp Review CLI
+
+A command-line interface for the Warp Review PR orchestrator.
+"""
+
+import sys
+import argparse
+from pathlib import Path
+
+# Add current directory to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from pr_review_orchestrator import PRReviewOrchestrator
+
+
+def cmd_run(args):
+    """Run the full PR review workflow"""
+    orchestrator = PRReviewOrchestrator(args.dir)
+    orchestrator.run_review()
+
+
+def cmd_status(args):
+    """Show current PR status"""
+    orchestrator = PRReviewOrchestrator(args.dir)
+    
+    branch = orchestrator.get_git_branch()
+    changed_files = orchestrator.get_changed_files()
+    
+    print(f"Branch: {branch}")
+    print(f"Changed files: {len(changed_files)}")
+    
+    if changed_files:
+        print("\nFiles:")
+        for f in changed_files[:10]:
+            print(f"  - {f}")
+        if len(changed_files) > 10:
+            print(f"  ... and {len(changed_files) - 10} more")
+    
+    # Check for existing review
+    review_dir = orchestrator.review_dir
+    if review_dir.exists():
+        outputs = list(review_dir.glob("*_output.txt"))
+        if outputs:
+            print(f"\nExisting review found: {len(outputs)} agent(s) completed")
+
+
+def cmd_agent(args):
+    """Generate prompt for a specific agent"""
+    orchestrator = PRReviewOrchestrator(args.dir)
+    
+    agent_name = args.agent.capitalize()
+    if agent_name == 'Pr':
+        agent_name = 'PRStatus'
+    elif agent_name == 'Test':
+        agent_name = 'TestCoverage'
+    elif agent_name == 'A11y' or agent_name == 'Access':
+        agent_name = 'Accessibility'
+    elif agent_name == 'Final':
+        agent_name = 'FinalChecks'
+    
+    if agent_name not in orchestrator.agents:
+        print(f"Unknown agent: {args.agent}")
+        print(f"Available agents: {', '.join(orchestrator.agents)}")
+        return
+    
+    # Generate prompt
+    prompts = {
+        'PRStatus': orchestrator.generate_pr_status_prompt(),
+        'TestCoverage': orchestrator.generate_test_coverage_prompt(),
+        'Accessibility': orchestrator.generate_accessibility_prompt(),
+        'FinalChecks': orchestrator.generate_final_checks_prompt()
+    }
+    
+    prompt = prompts[agent_name]
+    prompt_file = orchestrator.review_dir / f"{agent_name.lower()}_prompt.txt"
+    
+    with open(prompt_file, 'w') as f:
+        f.write(prompt)
+    
+    print(f"Prompt saved to: {prompt_file}")
+    
+    if args.show:
+        print("\n" + "=" * 60)
+        print(prompt)
+        print("=" * 60)
+
+
+def cmd_clean(args):
+    """Clean up review directory"""
+    orchestrator = PRReviewOrchestrator(args.dir)
+    
+    if orchestrator.review_dir.exists():
+        import shutil
+        shutil.rmtree(orchestrator.review_dir)
+        print(f"Cleaned: {orchestrator.review_dir}")
+    else:
+        print("No review directory found")
+
+
+def cmd_view(args):
+    """View agent output or prompt"""
+    orchestrator = PRReviewOrchestrator(args.dir)
+    
+    agent_name = args.agent.capitalize()
+    if agent_name == 'Pr':
+        agent_name = 'PRStatus'
+    elif agent_name == 'Test':
+        agent_name = 'TestCoverage'
+    elif agent_name == 'A11y' or agent_name == 'Access':
+        agent_name = 'Accessibility'
+    elif agent_name == 'Final':
+        agent_name = 'FinalChecks'
+    
+    file_type = 'prompt' if args.prompt else 'output'
+    file_path = orchestrator.review_dir / f"{agent_name.lower()}_{file_type}.txt"
+    
+    if file_path.exists():
+        with open(file_path, 'r') as f:
+            print(f.read())
+    else:
+        print(f"File not found: {file_path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Warp Review - PR review orchestrator for Warp',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  warp-review run                    # Run full review workflow
+  warp-review status                 # Check current branch status
+  warp-review agent prstatus         # Generate PRStatus prompt
+  warp-review agent test --show      # Generate and show TestCoverage prompt
+  warp-review view final             # View FinalChecks output
+  warp-review view test --prompt     # View TestCoverage prompt
+  warp-review clean                  # Clean review directory
+
+Agents:
+  prstatus, test, accessibility, final
+  (or: pr, test, a11y, final)
+        """
+    )
+    
+    parser.add_argument(
+        '-d', '--dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Command to run')
+    
+    # run command
+    parser_run = subparsers.add_parser('run', help='Run full PR review workflow')
+    parser_run.set_defaults(func=cmd_run)
+    
+    # status command
+    parser_status = subparsers.add_parser('status', help='Show current PR status')
+    parser_status.set_defaults(func=cmd_status)
+    
+    # agent command
+    parser_agent = subparsers.add_parser('agent', help='Generate prompt for specific agent')
+    parser_agent.add_argument('agent', help='Agent name (prstatus, test, accessibility, final)')
+    parser_agent.add_argument('--show', action='store_true', help='Display prompt after generating')
+    parser_agent.set_defaults(func=cmd_agent)
+    
+    # view command
+    parser_view = subparsers.add_parser('view', help='View agent output or prompt')
+    parser_view.add_argument('agent', help='Agent name')
+    parser_view.add_argument('--prompt', action='store_true', help='View prompt instead of output')
+    parser_view.set_defaults(func=cmd_view)
+    
+    # clean command
+    parser_clean = subparsers.add_parser('clean', help='Clean review directory')
+    parser_clean.set_defaults(func=cmd_clean)
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
