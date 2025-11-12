@@ -1,1 +1,23 @@
 venv/
+
+# PR Review Orchestrator
+.pr_review/
+
+# Warp Workflow (original version)
+.warp_workflow/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Output files
+output.txt
+final_output.txt
