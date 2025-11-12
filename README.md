@@ -15,32 +15,59 @@ Warp Review is a multi-agent orchestration system designed to help you review PR
 
 ## Quick Start
 
-### Install the CLI (optional but recommended)
+### 1. Install the CLI (one-time setup)
 
 ```bash
+cd ~/Sites/warp-review  # or wherever you cloned this repo
 ./install.sh
 ```
 
-This creates a symlink to `~/.local/bin/warp-review` so you can run it from anywhere.
+This creates a symlink to `~/.local/bin/warp-review` so you can run it from **any project**.
 
-### Usage
+### 2. Use it on Any Project
 
 ```bash
-# Run the full review
-warp-review run
-# or: python pr_review_orchestrator.py
+# Go to your project
+cd ~/Sites/my-project
 
-# Check PR status
+# Run warp-review
+warp-review run
+```
+
+That's it! Warp-review analyzes your current branch and changed files.
+
+### Usage Examples
+
+```bash
+# Full review workflow
+cd ~/Sites/my-app
+warp-review run
+
+# Quick status check
 warp-review status
 
-# Generate specific agent prompt
+# Generate specific agent
 warp-review agent test
 
-# View results
+# View final checklist
 warp-review view final
+
+# Use from anywhere with -d flag
+warp-review run -d ~/Sites/another-project
 ```
 
 See [QUICKSTART_PR_REVIEW.md](QUICKSTART_PR_REVIEW.md) for detailed instructions.
+
+## Works with Any Project
+
+Warp Review is **language and framework agnostic**. It works with:
+
+- ✅ **Any git repository** - Analyzes your branch and changes
+- ✅ **Any language** - JavaScript, Python, PHP, Go, Rust, etc.
+- ✅ **Any framework** - React, Django, Laravel, Next.js, etc.
+- ✅ **Multiple projects** - Use the same CLI everywhere
+
+Just install once, then use it on any project you're working on.
 
 ## Why Warp Review?
 
@@ -60,26 +87,50 @@ See [QUICKSTART_PR_REVIEW.md](QUICKSTART_PR_REVIEW.md) for detailed instructions
 
 ## Example Workflow
 
+### On Any Project
+
 ```bash
-# 1. Make your changes
+# Navigate to your project (any project!)
+cd ~/Sites/my-app
+
+# Create a feature branch
 git checkout -b feature/new-component
-# ... make changes ...
+
+# Make your changes
+# ... code code code ...
+
+# Commit your work
+git add .
 git commit -m "Add new component"
 
-# 2. Run Warp Review
-python pr_review_orchestrator.py
+# Run warp-review
+warp-review run
 
-# 3. Process agents through Warp
-# Each agent generates a specialized prompt
-# You process it through Warp Agent Mode
-# Save the analysis for the next agent
+# Follow the prompts for each agent:
+# 1. PRStatus - Reviews your changes
+# 2. TestCoverage - Identifies test gaps  
+# 3. Accessibility - Checks WCAG compliance
+# 4. FinalChecks - Comprehensive checklist
 
-# 4. Address findings
-# - Add missing tests
+# View final results
+warp-review view final
+
+# Address any issues found
+# - Write missing tests
 # - Fix accessibility issues
 # - Update documentation
 
-# 5. Submit PR with generated description
+# Submit your PR with confidence!
+gh pr create
+```
+
+### On Multiple Projects
+
+```bash
+# Review different projects without changing directories
+warp-review status -d ~/Sites/project-1
+warp-review status -d ~/Sites/project-2
+warp-review run -d ~/Sites/project-3
 ```
 
 ## Output Structure
