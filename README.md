@@ -106,6 +106,26 @@ python pr_review_orchestrator.py
 pip install -r requirements.txt
 ```
 
+## Testing
+
+Warp Review includes a comprehensive test suite:
+
+```bash
+# Run tests
+python test_pr_review_orchestrator.py
+
+# Or with pytest (if installed)
+python -m pytest test_pr_review_orchestrator.py -v
+```
+
+The test suite covers:
+- Orchestrator initialization
+- Agent prompt generation
+- Git integration
+- Save/load functionality
+- WCAG 2.1 compliance checks
+- Edge cases and error handling
+
 ## Philosophy
 
 Warp Review embodies:
