@@ -1,132 +1,138 @@
+# Warp Review
 
-# Tech Company Orchestrator - User Guide
+A Warp-native PR review orchestrator for comprehensive pre-submission code review.
 
-Welcome to the Tech Company Orchestrator! This project is designed to simulate the workflow of a tech company by orchestrating various agents to collaboratively process prompts and generate comprehensive outputs such as code, design specifications, deployment scripts, and more. The program utilizes Ollama models and a directed graph (via NetworkX) to model the interactions between different departments (agents).
+**Forked from:** [orchestrator-ollama](https://github.com/kliewerdaniel/orchestrator-ollama) by @kliewerdaniel
 
-## Table of Contents
+## What is Warp Review?
 
-1. [Features](#features)
-2. [Requirements](#requirements)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Workflow](#workflow)
-6. [Customizing Agents](#customizing-agents)
-7. [Troubleshooting](#troubleshooting)
-8. [Future Improvements](#future-improvements)
+Warp Review is a multi-agent orchestration system designed to help you review PRs before submission. It analyzes your changes through 4 specialized agents:
 
-## Features
+1. **PRStatus** - Analyzes your branch and changed files
+2. **TestCoverage** - Identifies test gaps and requirements  
+3. **Accessibility** - Verifies WCAG 2.1 compliance for UI changes
+4. **FinalChecks** - Generates comprehensive pre-submission checklist
 
-- **Agent-based Workflow**: Simulates different tech company departments (e.g., Product Management, Design, Engineering).
-- **Directed Graph Processing**: Uses NetworkX to define the flow of data between agents.
-- **Ollama Integration**: Employs locally hosted models for generating agent-specific outputs.
-- **Iterative Processing**: Refines outputs across iterations until the workflow is complete.
-- **Progress Persistence**: Logs intermediate and final outputs to files.
-- **Custom Prompt Support**: Accepts a structured prompt from an external file (`initial_prompt.txt`).
+## Quick Start
+
+### Install the CLI (optional but recommended)
+
+```bash
+./install.sh
+```
+
+This creates a symlink to `~/.local/bin/warp-review` so you can run it from anywhere.
+
+### Usage
+
+```bash
+# Run the full review
+warp-review run
+# or: python pr_review_orchestrator.py
+
+# Check PR status
+warp-review status
+
+# Generate specific agent prompt
+warp-review agent test
+
+# View results
+warp-review view final
+```
+
+See [QUICKSTART_PR_REVIEW.md](QUICKSTART_PR_REVIEW.md) for detailed instructions.
+
+## Why Warp Review?
+
+- **Accessibility-first** - WCAG 2.1 compliance built-in
+- **Test-focused** - Identifies gaps before they become issues
+- **Interactive** - Work with Warp's Agent Mode for intelligent review
+- **Comprehensive** - Covers code quality, testing, and accessibility
+
+## Documentation
+
+- **[CLI_QUICK_REFERENCE.md](CLI_QUICK_REFERENCE.md)** - CLI commands cheat sheet
+- **[CLI_USAGE.md](CLI_USAGE.md)** - Detailed CLI usage guide
+- **[QUICKSTART_PR_REVIEW.md](QUICKSTART_PR_REVIEW.md)** - Get started in 5 minutes
+- **[README_PR_REVIEW.md](README_PR_REVIEW.md)** - Full documentation and workflow
+- **[PR_REVIEW_SUMMARY.md](PR_REVIEW_SUMMARY.md)** - What changed from original
+- **[WARP.md](WARP.md)** - Warp-specific guidance
+
+## Example Workflow
+
+```bash
+# 1. Make your changes
+git checkout -b feature/new-component
+# ... make changes ...
+git commit -m "Add new component"
+
+# 2. Run Warp Review
+python pr_review_orchestrator.py
+
+# 3. Process agents through Warp
+# Each agent generates a specialized prompt
+# You process it through Warp Agent Mode
+# Save the analysis for the next agent
+
+# 4. Address findings
+# - Add missing tests
+# - Fix accessibility issues
+# - Update documentation
+
+# 5. Submit PR with generated description
+```
+
+## Output Structure
+
+```
+.pr_review/
+├── prstatus_prompt.txt          # Generated prompts
+├── prstatus_output.txt          # Your analysis
+├── testcoverage_prompt.txt
+├── testcoverage_output.txt
+├── accessibility_prompt.txt
+├── accessibility_output.txt
+├── finalchecks_prompt.txt
+└── finalchecks_output.txt       # Final checklist
+```
 
 ## Requirements
 
-- **Python**: 3.8 or higher
-- **Dependencies**:
-  - networkx
-  - json
-
-Ensure that Ollama is installed and the required models are downloaded locally.
-
-## Installation
-
-1. **Clone the Repository:**
-
-   ```bash
-   git clone https://github.com/kliewerdaniel/orchestrator-ollama.git
-   cd orchestrator-ollama
-   ```
-
-2. **Install Dependencies:**
-
-   Use pip to install the required libraries:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-
-## Usage
-
-### Step 1: Prepare Your Initial Prompt
-
-Create an `initial_prompt.txt` file in the root directory. The prompt should be a JSON-formatted dictionary containing:
-
-- **message**: The initial idea or requirements.
-- **code**: Leave this as an empty string (`""`) initially.
-- **readme**: Leave this as an empty string (`""`) initially.
-
-Example `initial_prompt.txt`:
-
-```json
-{
-    "message": "Develop a platform that connects freelancers with clients using AI for project matching.",
-    "code": "",
-    "readme": ""
-}
-```
-
-### Step 2: Run the Program
-
-Execute the `main.py` file:
+- Python 3.8+
+- git
+- gh CLI (optional, for PR operations)
 
 ```bash
-python main.py
+pip install -r requirements.txt
 ```
 
-### Step 3: Review the Outputs
+## Philosophy
 
-The program generates the following files:
+Warp Review embodies:
+- **Accessibility-first development** (WCAG 2.1)
+- **Test-driven practices** (comprehensive coverage)
+- **Code quality standards** (linting, formatting)
+- **Thoughtful reviews** (clear descriptions, no surprises)
 
-- **output.txt**: Contains the intermediate outputs after each iteration.
-- **final_output.txt**: Contains the final output, including the message, code, and readme.
+## Original Project
 
-## Workflow
+This is a specialized fork of [orchestrator-ollama](https://github.com/kliewerdaniel/orchestrator-ollama).
 
-The program simulates the workflow of a tech company by processing the prompt through the following agents:
+**What changed:**
+- Renamed from Orchestrator-Ollama to warp-review
+- Adapted for PR review instead of product development
+- Uses Warp Agent Mode instead of local Ollama
+- Focused on 4 specialized review agents
+- Added git integration for real change analysis
 
-1. **Product Management**: Expands the initial idea into detailed product requirements.
-2. **Design**: Creates UI/UX specifications, including wireframes and style guides.
-3. **Engineering**: Develops the software application based on the specifications.
-4. **Testing**: Generates comprehensive test cases for quality assurance.
-5. **Security**: Analyzes and enhances the security of the application.
-6. **DevOps**: Creates deployment scripts and CI/CD pipelines.
-7. **Final Agent**: Verifies if the project is complete or requires further refinement.
+The original Ollama-based orchestrator files remain in this repo for reference:
+- `README_ORIGINAL.md` - Original project documentation
+- `main.py` and `agents/` - Original orchestrator code
 
-The agents are connected in a directed graph, ensuring an organized flow of information between departments.
+## Credits
 
-## Customizing Agents
+Original concept and architecture: [orchestrator-ollama](https://github.com/kliewerdaniel/orchestrator-ollama) by @kliewerdaniel
 
-### Modify Agent Behavior
+## License
 
-Each agent has its own Python file (e.g., `engineering.py`, `design.py`) where you can adjust:
-
-- The prompts sent to the Ollama model.
-- The processing logic for outputs.
-
-### Add New Agents
-
-To add a new agent, create a new Python module in the agents directory and integrate it into the directed graph in the main script.
-
-## Troubleshooting
-
-
-- **NetworkX Errors**: Verify that all dependencies are installed correctly.
-- **JSON Parsing Issues**: Check that `initial_prompt.txt` is properly formatted as JSON.
-
-## Future Improvements
-
-- **Parallel Execution**: Allow parallel execution of agents where applicable.
-- **Enhanced Error Handling**: Improve robustness by adding retries and better error reporting.
-- **Interactive CLI**: Provide a command-line interface for easier customization of inputs and parameters.
-- **Integration Testing**: Add tests to validate the functionality of each agent and the overall workflow.
-
-## Contributions
-
-Feel free to fork the repository and submit pull requests for improvements. Feedback and suggestions are always welcome!
-
-With this guide, you should be able to set up, run, and customize the Tech Company Orchestrator with Ollama. Happy orchestrating! 🎉
+Maintains original license from orchestrator-ollama project.
